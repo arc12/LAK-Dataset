@@ -1,0 +1,13 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX swc: <http://data.semanticweb.org/ns/swc/ontology#>
+PREFIX led: <http://data.linkededucation.org/ns/linked-education.rdf#>
+PREFIX swrc: <http://swrc.ontoware.org/ontology#>
+
+SELECT ?paper ?origin ?month ?year ?title ?abstract ?content WHERE {  ?paper rdf:type swrc:InProceedings;
+			dc:title ?title;
+			swc:isPartOf ?origin;
+			swrc:abstract ?abstract;
+			swrc:month ?month;
+			swrc:year ?year .
+			OPTIONAL{?paper led:body ?content}}
