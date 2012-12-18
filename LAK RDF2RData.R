@@ -12,19 +12,29 @@
 #See http://www.solaresearch.org/resources/lak-dataset/
 
 library("rrdf")
+read.me<-"This is the LAK Challenge Dataset (LAK, JETS and EDM combined). Please see http://www.solaresearch.org/resources/lak-dataset/ for the data from which it was created and for the terms and conditions of use. It has been created using the RDF version using code at http://crunch.kmi.open.ac.uk/people/~acooper/LAK%20RDF2RData.R . Please report issues with the R script and R version of the data to a.r.cooper [at] bolton.ac.uk and consult http://www.solaresearch.org/resources/lak-dataset/ for other queries. There is no warranty of any kind; you use this at your own risk and without any commitment to support."
 
-triples<-combine.rdf(
-                     combine.rdf(load.rdf("Data/lak2011_fulltext.rdf", "RDF/XML"),
-                                 load.rdf("Data/lak2012_fulltext.rdf", "RDF/XML")
-                                 ),
-                     load.rdf("Data/jets12_fulltext.rdf", "RDF/XML")
-                     )
+source.rdf<-list(lak2011="Data/lak2011_fulltext.rdf",
+                 lak2012="Data/lak2012_fulltext.rdf",
+                 jets12="Data/jets12_fulltext.rdf",
+                 edm2008="Data/edm2008.rdf",
+                 edm2009="Data/edm2009.rdf",
+                 edm2010="Data/edm2010.rdf",
+                 edm2011="Data/edm2011.rdf",
+                 edm2012="Data/edm2012.rdf")
+
+triples<-new.rdf()
+
+for(f in source.rdf){
+   triples<-combine.rdf(triples,load.rdf(f, "RDF/XML"))
+}
 summarize.rdf(triples)
 
 #these should be the times the source data files were created from the triple store
-mtimes<-list(lak2011=file.info("Data/lak2011_fulltext.rdf")$mtime,
-             lak2012=file.info("Data/lak2012_fulltext.rdf")$mtime,
-             jets12=file.info("Data/jets12_fulltext.rdf")$mtime)
+get.time<-function(f){
+   file.info(f)$mtime
+}
+mtimes<-lapply(source.rdf, get.time)
 
 #these queries use OPTIONAL in case some content is missing. This may be unnecessary.
 #people and papers have row.names set to the subject identifier but authorship has no such
@@ -63,20 +73,25 @@ papers.query<-paste("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
 
 papers<-as.data.frame(sparql.rdf(triples,papers.query,rowvarname="paper"))
 
-#extract the authorship. a data.frame isn't elegant for doing anything with; should be transformed to a network object of some kind
+#extract the authorship. a data.frame isn't elegant for doing anything with; should be transformed to a network object of some kind.
+#2012-12-18 added ?name for convenience
 authorship.query<-paste("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
                         "PREFIX swc: <http://data.semanticweb.org/ns/swc/ontology#>",
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/>",
-                           "SELECT ?person ?paper ?origin WHERE {",
+                           "SELECT ?person ?name ?paper ?origin WHERE {",
                               "?person rdf:type foaf:Person;",
+                              "foaf:name ?name ;",
                               "foaf:made ?paper .",
                               "OPTIONAL{?paper swc:isPartOf ?origin}",
                            "}")
 
 authorship<-as.data.frame(sparql.rdf(triples,authorship.query))
 
-save(people, papers, authorship, mtimes, file="LAK Dataset.rData")
+save(read.me, people, papers, authorship, mtimes, file="LAK-Dataset.RData")
 
-
+#quick view of authorship network
+# library(network)
+# net<-network(authorship[,c(1,3)])
+# plot(net, vertex.cex=0.6, arrowhead.cex=0.5)
   
 
