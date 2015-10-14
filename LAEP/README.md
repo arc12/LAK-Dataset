@@ -55,11 +55,22 @@ FILTER(isURI(?subject)) .
 
 ```
 #to get counts, set Twinkle to use ARQ syntax (rather than SPARQL syntax)
-PREFIX dc:<http://purl.org/dc/elements/1.1/>
+#This counts conference proceedings papers
+PREFIX swrc: <http://swrc.ontoware.org/ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 select count(*) where {
-?paper dc:subject ?subject .
-FILTER(isLiteral(?subject)) .
+?paper rdf:type swrc:InProceedings .
+}
+```
+
+```
+#Journal articles have a different type
+PREFIX swrc: <http://swrc.ontoware.org/ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+select count(*) where {
+?paper rdf:type swrc:Article .
 }
 ```
 
