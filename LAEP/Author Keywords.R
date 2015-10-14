@@ -255,12 +255,13 @@ write.csv(edges, file=paste(outDir,"gephiEdges_gt3.csv",sep=""),row.names=F)
 
 ## - keyword occurrence for selected terms which were manually selected by inspection of all
 # keywords to select those which appeared to bemost relevant to the topic of adoption or implementation issues
-rq.terms<-c("open source","pedagogy","policy","privacy","capacity building",
+rq.terms<-c("analytics architecture", "open source","pedagogy","policy","privacy","capacity building",
 "change management","community building","cost-effectiveness","cultural change","impact analysis","implementation","leadership","pedagogical models","privacy theory","school failure","strategic planning","sustainability","systemic application")
 # not included as they were obviously off topic when the paper titles they relate to were looked up:
 # "strategy performance","cyber security","quality control","software quality","software security","uptake"
-rq.df<-literals[which(literals$subject %in% rq.terms), c("paper","subject")]
-rq.table<-table(rq.df)
+rq.df<-literals[which(literals$subject %in% rq.terms), ]
+write.csv(rq.df, file=paste(outDir,"RQ Papers Keywords.csv",sep=""))
+rq.table<-table(rq.df[,c("paper","subject")])
 rq.incidence<-t(rq.table) %*% rq.table #elements are number of times keyword pair occurs
 diag(rq.incidence)<-0#diagonals have keyword count, but we'll suppress self-edges
 
