@@ -50,7 +50,11 @@ iedm<-c("<http://data.linkededucation.org/resource/lak/conference/edm2010/procee
 literals<-cbind(literals, data.frame(community=rep(NA, length(literals[,1]))))
 literals$community[which(literals$origin %in% solar)]<-"SoLAR"
 literals$community[which(literals$origin %in% iedm)]<-"IEDM"
-l.community.table<-table(literals$community)#number of key-terms (subjects) used by each community
+
+#just get the unique papers and their venue
+p<-literals[,c("paper","community")]
+p.unique<-p[!duplicated(p),]
+comm.table<-table(p.unique$community)#number of key-terms (subjects) used by each community
 
 #get distinct subject in alpha order
 l.unique<-unique(literals$subject)
@@ -157,7 +161,7 @@ l.table<-l.table[order(l.table, decreasing=T)]
 write.csv(l.table,file=paste(outDir,"Subject Literal Frequencies.csv",sep=""))
 
 # >>>>>>>>>>>>>>>Compute relative frequency, split according to the SoLAR/IEDM communities <<<<<<<<<<<<<<<<<
-#Relative freq is defined as the proportion of keywords used *in that community* which are the key-term in focus.
+#Relative freq is defined as the proportion of papers with the keyword *in that community*
 #The actual difference in keyword freq (total) observed in the dataset (at present!) is only about 20%, so the proportional weighting is not that different from just showing counts broken down by community but....
 #append empty cols for both communities, ready for injection of counts
 l.df<-data.frame(row.names="term", term=names(l.table), count=l.table, SoLAR=rep(NA, length(l.table)), IEDM=rep(NA, length(l.table)))
@@ -165,8 +169,8 @@ l.df<-data.frame(row.names="term", term=names(l.table), count=l.table, SoLAR=rep
 l.table.solar<-table(literals$subject[literals$community=="SoLAR"])
 l.table.iedm<-table(literals$subject[literals$community=="IEDM"])
 #injet proportions (as %) into DF
-l.df[,"SoLAR"]<- 100*l.table.solar[row.names(l.df)]/l.community.table["SoLAR"]
-l.df[,"IEDM"]<- 100*l.table.iedm[row.names(l.df)]/l.community.table["IEDM"]
+l.df[,"SoLAR"]<- 100*l.table.solar[row.names(l.df)]/comm.table["SoLAR"]
+l.df[,"IEDM"]<- 100*l.table.iedm[row.names(l.df)]/comm.table["IEDM"]
 l.df[is.na(l.df)]<-0
 #re-order according to the weighted frequency (the original table was ordered by raw total frequency)
 weighted.freq<-l.df[,"SoLAR"]+l.df[,"IEDM"]
@@ -178,16 +182,16 @@ Selective.Bar.Plot<-function(term.list, title, file.name){
    par(mar = c(4,10,2,2) + 0.1, cex=2)#must be set INSIDE png renderer
    df<-l.df[term.list,]
    df<-df[order(df$sum, decreasing=T),]
-   barplot(t(as.matrix(df[,c("SoLAR","IEDM")])), horiz=T, names.arg=row.names(df), legend.text=colnames(df[,c("SoLAR","IEDM")]), cex.names=0.5, las=1, main=paste(title,"Keyword Proportions"), xlab="% of keyword useage")
+   barplot(t(as.matrix(df[,c("SoLAR","IEDM")])), horiz=T, names.arg=row.names(df), legend.text=colnames(df[,c("SoLAR","IEDM")]), cex.names=0.65, las=1, main=paste(title,"Keyword Proportions"), xlab="% of papers")
    dev.off()
 }
 
 #1st select those terms which will be plotted,
-cut.1<-2.0
-cut.2<-0.65
-Selective.Bar.Plot(rownames(l.df)[l.df$sum>cut.1], title="Highest Frequency Keyword Proportions", file.name = "Top Terms")
-Selective.Bar.Plot(rownames(l.df)[l.df$sum<=cut.1 & l.df$sum>cut.2], title="High Frequency Keyword Proportions", file.name = "High Terms")
-Selective.Bar.Plot(rownames(l.df)[l.df$sum<=cut.2], title="Mid-range Frequency Keyword Proportions", file.name = "Mid Terms")
+#suppress "learning analytics", the top term and plot equal batches down to 4 occurrences
+batch<-round((sum(l.table>3)-1)/3)
+Selective.Bar.Plot(rownames(l.df)[2:batch], title="Highest Frequency", file.name = "Top Terms")
+Selective.Bar.Plot(rownames(l.df)[batch+1:batch], title="High Frequency", file.name = "High Terms")
+Selective.Bar.Plot(rownames(l.df)[2*batch+1:batch], title="Mid-range Frequency", file.name = "Mid Terms")
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>> Inspect some some manually-grouped term groups <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #quick pie plot for keywords that occur 3 or more times. plot shows the total number of keyword occurrences, not number of distinct keywords in the category
