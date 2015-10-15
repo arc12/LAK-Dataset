@@ -54,7 +54,7 @@ literals$community[which(literals$origin %in% iedm)]<-"IEDM"
 #just get the unique papers and their venue
 p<-literals[,c("paper","community")]
 p.unique<-p[!duplicated(p),]
-comm.table<-table(p.unique$community)#number of key-terms (subjects) used by each community
+p.comm.table<-table(p.unique$community)#number of key-terms (subjects) used by each community
 
 #get distinct subject in alpha order
 l.unique<-unique(literals$subject)
@@ -169,8 +169,8 @@ l.df<-data.frame(row.names="term", term=names(l.table), count=l.table, SoLAR=rep
 l.table.solar<-table(literals$subject[literals$community=="SoLAR"])
 l.table.iedm<-table(literals$subject[literals$community=="IEDM"])
 #injet proportions (as %) into DF
-l.df[,"SoLAR"]<- 100*l.table.solar[row.names(l.df)]/comm.table["SoLAR"]
-l.df[,"IEDM"]<- 100*l.table.iedm[row.names(l.df)]/comm.table["IEDM"]
+l.df[,"SoLAR"]<- 100*l.table.solar[row.names(l.df)]/p.comm.table["SoLAR"]
+l.df[,"IEDM"]<- 100*l.table.iedm[row.names(l.df)]/p.comm.table["IEDM"]
 l.df[is.na(l.df)]<-0
 #re-order according to the weighted frequency (the original table was ordered by raw total frequency)
 weighted.freq<-l.df[,"SoLAR"]+l.df[,"IEDM"]
@@ -179,10 +179,10 @@ l.df<-l.df[order(weighted.freq, decreasing=T),]
 
 Selective.Bar.Plot<-function(term.list, title, file.name){
    png(paste(plotDir,file.name,".png",sep=""), width = 1000, height = 1000)
-   par(mar = c(4,10,2,2) + 0.1, cex=2)#must be set INSIDE png renderer
+   par(mar = c(4,10.5,2,2) + 0.1, cex=2)#must be set INSIDE png renderer
    df<-l.df[term.list,]
    df<-df[order(df$sum, decreasing=T),]
-   barplot(t(as.matrix(df[,c("SoLAR","IEDM")])), horiz=T, names.arg=row.names(df), legend.text=colnames(df[,c("SoLAR","IEDM")]), cex.names=0.65, las=1, main=paste(title,"Keyword Proportions"), xlab="% of papers")
+   barplot(t(as.matrix(df[,c("SoLAR","IEDM")])), horiz=T, names.arg=row.names(df), legend.text=colnames(df[,c("SoLAR","IEDM")]), cex.names=0.75, las=1, main=paste(title,"Keywords"), xlab="% of papers", ylim=c(0,5+max(30, length(term.list))))
    dev.off()
 }
 
@@ -197,19 +197,20 @@ Selective.Bar.Plot(rownames(l.df)[2*batch+1:batch], title="Mid-range Frequency",
 #quick pie plot for keywords that occur 3 or more times. plot shows the total number of keyword occurrences, not number of distinct keywords in the category
 #some very bland terms have not been included: collaboration,learning,evaluation,education,multiple representations,automated detectors,discovery with models,fractions,portability,practice,special issue
 tag.labels<-c("analytics technique","software system","human attribute, behaviour, or state","objective of analytics","educational context or activity","educational theory","general domain term","research or design method")
+tag.shortlalels<-c("Techniques", "Software", "Human Subject", "Objectives", "Context", "Theory", "General", "ResearchMethods")
 tag.counts<-c(164,80,66,76,150,9,332,8)
 tag.counts2<-c(164,80,66,76,150,9,167,8)#omit "learing analytics" an "educational data mining"
 tag.cols=rainbow(length(tag.labels))
 png(paste(plotDir,"Categories.png",sep=""), width = 1000, height = 1000)
-pie(x=tag.counts[order(tag.counts)], labels=NA , main="Categorised Keyword Occurrence",init.angle=88, col = tag.cols[order(tag.counts)], radius = 0.5, cex.main=2.0)
+pie(x=tag.counts[order(tag.counts)], labels=tag.shortlalels[order(tag.counts2)] , main="Categorised Keyword Occurrence",init.angle=88, col = tag.cols[order(tag.counts)], radius = 0.5, cex.main=2.0, cex=2.0)
 dev.off()
 png(paste(plotDir,"Categories_excl.png",sep=""), width = 1000, height = 1000)
-pie(x=tag.counts2[order(tag.counts2)],labels = tag.labels[order(tag.counts2)], main="Categorised Keyword Occurrence (excl LA and EDM)",init.angle=88, col = tag.cols[order(tag.counts2)])
+pie(x=tag.counts2[order(tag.counts2)],labels = tag.shortlalels[order(tag.counts2)], main="Categorised Keyword Occurrence (excl LA and EDM)",init.angle=88, col = tag.cols[order(tag.counts2)], radius = 0.5, cex.main=2.0, cex=2.0)
 dev.off()
-png(paste(plotDir,"Categories_Legend.png",sep=""), width=1000, height=1000)
+png(paste(plotDir,"Categories_Legend.png",sep=""), width=600, height=400)
 op<-par(mar=c(2,2,2,2))
 plot.new()
-legend(x="bottomleft",legend=tag.labels, fill=tag.cols, title="Keyword Categories")
+legend(x="bottomleft",legend=tag.labels, fill=tag.cols, title="Keyword Categories", cex=2.0)
 dev.off()
 
 #these are for 3 or more occurrences of the keyword
@@ -223,12 +224,12 @@ general.domain<-c("learning analytics","educational data mining","data mining","
 
 
 Selective.Bar.Plot(analytics.techniques,"Analytics Techniques","Cat-analytics_tech")
-Selective.Bar.Plot(sw.system,"Software","Cat-software")
+Selective.Bar.Plot(sw.system,"Software-related","Cat-software")
 Selective.Bar.Plot(human,"Human Attributes, Behaviour, or State","Cat-human")
-Selective.Bar.Plot(obj.anal,"Aims or Objectives of the Analytics","Cat-objective")
+Selective.Bar.Plot(obj.anal,"Aims/Objectives of the Analytics","Cat-objective")
 Selective.Bar.Plot(ed.ctxt,"Educational Context","Cat-ed_context")
 Selective.Bar.Plot(res.theory,"Research and Theory","Cat-research_theory")
-Selective.Bar.Plot(general.domain,"General Domain Terms","Cat-general")
+Selective.Bar.Plot(general.domain,"General Domain","Cat-general")
 
 ## >>>>>>>>>>>>>>>>>>>>>> keyword co-occurrence <<<<<<<<<<<<<<<<<<<<<<<<<
 co.terms<-names(l.table[l.table>3])#freq>3 - may want to drop this selection completely - use for now to keep viz more simple
