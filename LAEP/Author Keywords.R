@@ -182,7 +182,7 @@ Selective.Bar.Plot<-function(term.list, title, file.name){
    par(mar = c(4,10.5,2,2) + 0.1, cex=2)#must be set INSIDE png renderer
    df<-l.df[term.list,]
    df<-df[order(df$sum, decreasing=T),]
-   barplot(t(as.matrix(df[,c("SoLAR","IEDM")])), horiz=T, names.arg=row.names(df), legend.text=colnames(df[,c("SoLAR","IEDM")]), cex.names=0.75, las=1, main=paste(title,"Keywords"), xlab="% of papers", ylim=c(0,5+max(30, length(term.list))))
+   barplot(t(as.matrix(df[,c("SoLAR","IEDM")])), horiz=T, names.arg=row.names(df), legend.text=colnames(df[,c("SoLAR","IEDM")]), args.legend=list(x="bottomleft", inset=c(-0.28,-0.1)), cex.names=0.75, las=1, main=paste(title,"Keywords"), xlab="% of papers", ylim=c(0,5+max(30, length(term.list))))
    dev.off()
 }
 
@@ -197,7 +197,7 @@ Selective.Bar.Plot(rownames(l.df)[2*batch+1:batch], title="Mid-range Frequency",
 #quick pie plot for keywords that occur 3 or more times. plot shows the total number of keyword occurrences, not number of distinct keywords in the category
 #some very bland terms have not been included: collaboration,learning,evaluation,education,multiple representations,automated detectors,discovery with models,fractions,portability,practice,special issue
 tag.labels<-c("analytics technique","software system","human attribute, behaviour, or state","objective of analytics","educational context or activity","educational theory","general domain term","research or design method")
-tag.shortlalels<-c("Techniques", "Software", "Human Subject", "Objectives", "Context", "Theory", "General", "ResearchMethods")
+tag.shortlalels<-c("Techniques", "Software", "Human Subject", "Objectives", "Context", "Theory", "General", "Research Methods")
 tag.counts<-c(164,80,66,76,150,9,332,8)
 tag.counts2<-c(164,80,66,76,150,9,167,8)#omit "learing analytics" an "educational data mining"
 tag.cols=rainbow(length(tag.labels))
@@ -220,7 +220,7 @@ human<-c("affect","engagement","behavior","boredom","confusion","frustration","g
 obj.anal<-c("prediction","personalized learning","affective computing","affect detection","retention","user modeling","individual differences","causal discovery","learner modeling","cognitive modeling","effect of help on performance","knowledge retention","stealth assessment","student retention")
 ed.ctxt<-c("massive open online course","collaborative learning","higher education","assessment","CSCL","educational assessment","educational game","elearning","online learning","mathematics education","networked learning","self-regulated learning","formative assessment","writing","blended learning","discourse","distance education","game-based learning","games","homework","mathematics","reading comprehension","science inquiry","serious game","social learning","tutorial dialogue")
 res.theory<-c("constructionism","design research","evidence-centered design","pedagogy")
-general.domain<-c("learning analytics","educational data mining","data mining","student model","visualization","machine learning","discourse analytics","social learning analytics","analytics","big data","data analysis","open source","academic analytics","eye tracking","log files","SoLAR","visual analytics","analysis","dynamical analysis","learning curves","open learner model","scientometrics","teaching analytics")
+general.domain<-c("educational data mining","data mining","student model","visualization","machine learning","discourse analytics","social learning analytics","analytics","big data","data analysis","open source","academic analytics","eye tracking","log files","SoLAR","visual analytics","analysis","dynamical analysis","learning curves","open learner model","scientometrics","teaching analytics") #suppressed "learning analytics"
 
 
 Selective.Bar.Plot(analytics.techniques,"Analytics Techniques","Cat-analytics_tech")
@@ -260,7 +260,7 @@ write.csv(edges, file=paste(outDir,"gephiEdges_gt3.csv",sep=""),row.names=F)
 
 ## - keyword occurrence for selected terms which were manually selected by inspection of all
 # keywords to select those which appeared to bemost relevant to the topic of adoption or implementation issues
-rq.terms<-c("analytics architecture", "open source","pedagogy","policy","privacy","capacity building",
+rq.terms<-c("analytics architecture", "practice", "open source","pedagogy","policy","privacy","capacity building",
 "change management","community building","cost-effectiveness","cultural change","impact analysis","implementation","leadership","pedagogical models","privacy theory","school failure","strategic planning","sustainability","systemic application")
 # not included as they were obviously off topic when the paper titles they relate to were looked up:
 # "strategy performance","cyber security","quality control","software quality","software security","uptake"
