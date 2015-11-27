@@ -187,8 +187,8 @@ Selective.Bar.Plot<-function(term.list, title, file.name){
 }
 
 #1st select those terms which will be plotted,
-#suppress "learning analytics", the top term and plot equal batches down to 4 occurrences
-batch<-round((sum(l.table>3)-1)/3)
+#suppress "learning analytics", the top term and plot equal batches down to around 4 occurrences
+batch<-round((sum(l.df$sum>1.7)-1)/3)
 Selective.Bar.Plot(rownames(l.df)[2:batch], title="Highest Frequency", file.name = "Top Terms")
 Selective.Bar.Plot(rownames(l.df)[batch+1:batch], title="High Frequency", file.name = "High Terms")
 Selective.Bar.Plot(rownames(l.df)[2*batch+1:batch], title="Mid-range Frequency", file.name = "Mid Terms")
